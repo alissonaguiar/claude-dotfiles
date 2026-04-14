@@ -1,0 +1,5 @@
+.env
+*.bak
+# Session data — só memórias (*.md) são relevantes
+projects/**/*.jsonl
+projects/**/*.meta.json

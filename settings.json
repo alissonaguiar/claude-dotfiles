@@ -1,0 +1,54 @@
+{
+  "model": "sonnet",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "CLAUDE_PLUGIN_ROOT=\"/Users/alisson/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.7\" \"/Users/alisson/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.7/hooks/run-hook.cmd\" session-start",
+            "async": false
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "zoominfo@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true,
+    "bmad-method-lifecycle@bmad-method": true,
+    "everything-claude-code@everything-claude-code": true,
+    "mem0@mem0-plugins": false,
+    "bitwize-music@bitwize-music": true
+  },
+  "extraKnownMarketplaces": {
+    "bmad-method": {
+      "source": {
+        "source": "github",
+        "repo": "bmad-code-org/bmad-method"
+      }
+    },
+    "everything-claude-code": {
+      "source": {
+        "source": "github",
+        "repo": "affaan-m/everything-claude-code"
+      }
+    },
+    "mem0-plugins": {
+      "source": {
+        "source": "github",
+        "repo": "mem0ai/mem0"
+      }
+    },
+    "bitwize-music": {
+      "source": {
+        "source": "github",
+        "repo": "bitwize-music-studio/claude-ai-music-skills"
+      }
+    }
+  },
+  "autoDreamEnabled": true,
+  "skipDangerousModePermissionPrompt": true
+}
