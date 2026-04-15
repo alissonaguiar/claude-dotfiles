@@ -1,5 +1,7 @@
 .env
 *.bak
-# Session data — só memórias (*.md) são relevantes
-projects/**/*.jsonl
-projects/**/*.meta.json
+
+# Arquivos pessoais — ficam só no claude-dotfiles-private
+history.jsonl
+settings.local.json
+projects/

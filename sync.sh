@@ -5,6 +5,9 @@ set -e
 DOTFILES_DIR="$(cd "$(dirname "$0")" && pwd)"
 CLAUDE_DIR="$HOME/.claude"
 
+# Repo privado (full backup, incluindo history + memories + settings.local)
+PRIVATE_DIR="$HOME/GitHub/claude-dotfiles-private"
+
 echo "==> Sincronizando ~/.claude -> $DOTFILES_DIR"
 
 # --- 1. Sync secrets para o Bitwarden ---
@@ -111,11 +114,53 @@ for skill_dir in "$CLAUDE_DIR/skills"/*/; do
   echo "  [ok] skill: $skill_name"
 done
 
-# Project memories
+# Project memories (só no repo público — sem jsonl/meta)
 rm -rf "$DOTFILES_DIR/projects"
-cp -r "$CLAUDE_DIR/projects" "$DOTFILES_DIR/projects"
-echo "  [ok] project memories"
+mkdir -p "$DOTFILES_DIR/projects"
+find "$CLAUDE_DIR/projects" -name "*.md" | while read -r f; do
+  rel="${f#$CLAUDE_DIR/}"
+  dest="$DOTFILES_DIR/$rel"
+  mkdir -p "$(dirname "$dest")"
+  cp "$f" "$dest"
+done
+echo "  [ok] project memories (*.md only)"
+
+# --- 3. Sync para o repo PRIVADO (tudo, incluindo history + settings.local) ---
+if [ -d "$PRIVATE_DIR" ]; then
+  echo ""
+  echo "--> Sincronizando repo privado ($PRIVATE_DIR)..."
+
+  cp "$CLAUDE_DIR/settings.json"       "$PRIVATE_DIR/settings.json"
+  cp "$CLAUDE_DIR/settings.local.json" "$PRIVATE_DIR/settings.local.json"
+  [ -f "$CLAUDE_DIR/history.jsonl" ] && cp "$CLAUDE_DIR/history.jsonl" "$PRIVATE_DIR/history.jsonl"
+
+  # Skills no privado também
+  rm -rf "$PRIVATE_DIR/skills"
+  mkdir -p "$PRIVATE_DIR/skills"
+  for skill_dir in "$CLAUDE_DIR/skills"/*/; do
+    skill_name=$(basename "$skill_dir")
+    cp -r "$skill_dir" "$PRIVATE_DIR/skills/$skill_name"
+  done
+
+  # Memórias completas no privado
+  rm -rf "$PRIVATE_DIR/projects"
+  cp -r "$CLAUDE_DIR/projects" "$PRIVATE_DIR/projects"
+
+  # Copia também scripts/secrets do repo público para manter em sync
+  cp "$DOTFILES_DIR/secrets.json"            "$PRIVATE_DIR/secrets.json"
+  cp "$DOTFILES_DIR/claude.json.example"     "$PRIVATE_DIR/claude.json.example"
+  cp "$DOTFILES_DIR/install.sh"              "$PRIVATE_DIR/install.sh"
+  cp "$DOTFILES_DIR/sync.sh"                 "$PRIVATE_DIR/sync.sh"
+  cp "$DOTFILES_DIR/README.md"               "$PRIVATE_DIR/README.md"
+  cp -r "$DOTFILES_DIR/scripts"              "$PRIVATE_DIR/"
+  cp -r "$DOTFILES_DIR/docs"                 "$PRIVATE_DIR/" 2>/dev/null || true
+
+  echo "  [ok] repo privado atualizado"
+else
+  echo "  [warn] $PRIVATE_DIR não encontrado — pulando sync privado"
+fi
 
 echo ""
 echo "==> Done. Review com: git diff"
-echo "    Commit com: git add -A && git commit -m 'sync: \$(date +%Y-%m-%d)' && git push"
+echo "    Commit público: cd $DOTFILES_DIR && git add -A && git commit -m 'sync: \$(date +%Y-%m-%d)' && git push"
+echo "    Commit privado: cd $PRIVATE_DIR && git add -A && git commit -m 'sync: \$(date +%Y-%m-%d)' && git push"
