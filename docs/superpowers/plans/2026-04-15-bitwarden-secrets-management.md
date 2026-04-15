@@ -519,15 +519,15 @@ brew install node bitwarden-cli
 
 # gcloud CLI
 brew install --cask google-cloud-sdk
-gcloud auth login --account alisson@webjump.ai
-gcloud config set project solid-choir-461101-t3
-gcloud auth application-default login --account alisson@webjump.ai
+gcloud auth login
+gcloud config set project YOUR_GCP_PROJECT_ID
+gcloud auth application-default login
 \`\`\`
 
 ### 2. Clonar e autenticar
 
 \`\`\`bash
-git clone git@github.com:alissonaguiar/claude-dotfiles.git ~/GitHub/claude-dotfiles
+git clone git@github.com:YOUR_USER/claude-dotfiles.git ~/GitHub/claude-dotfiles
 cd ~/GitHub/claude-dotfiles
 
 # Autenticar no Bitwarden (uma vez)

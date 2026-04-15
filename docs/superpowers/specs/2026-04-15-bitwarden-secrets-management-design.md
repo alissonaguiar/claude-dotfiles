@@ -140,10 +140,10 @@ Secrets ausentes não bloqueiam o install — permitem instalar o que existe e r
 ```bash
 # Pré-requisitos
 brew install node bitwarden-cli
-gcloud auth login --account alisson@webjump.ai
+gcloud auth login
 
 # Clonar e configurar
-git clone git@github.com:alissonaguiar/claude-dotfiles.git ~/GitHub/claude-dotfiles
+git clone git@github.com:YOUR_USER/claude-dotfiles.git ~/GitHub/claude-dotfiles
 cd ~/GitHub/claude-dotfiles
 
 # Autenticar no Bitwarden (uma vez)
