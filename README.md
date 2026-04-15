@@ -1,6 +1,6 @@
 # claude-dotfiles
 
-Backup portável da configuração do Claude Code.
+Backup portável da configuração do Claude Code, com secrets gerenciados via Bitwarden.
 Repo: https://github.com/alissonaguiar/claude-dotfiles
 
 ## O que está aqui
@@ -10,20 +10,22 @@ Repo: https://github.com/alissonaguiar/claude-dotfiles
 | `settings.json` | Plugins habilitados, hooks, modelo padrão |
 | `settings.local.json` | Permissões de Bash/WebFetch |
 | `history.jsonl` | Histórico de comandos do Claude |
-| `claude.json.example` | MCP servers (sem API keys) |
-| `.env.example` | Template das API keys necessárias |
+| `secrets.json` | Mapa de env vars → itens do Bitwarden (sem valores) |
+| `claude.json.example` | MCP servers com placeholders de vars |
 | `skills/` | Skills customizadas (ui-ux-pro-max, air-brand-guidelines) |
 | `projects/` | Memórias por projeto |
+| `scripts/bw-helpers.sh` | Funções auxiliares do Bitwarden CLI |
 | `install.sh` | Script de restauração numa máquina nova |
-| `sync.sh` | Script para atualizar o backup |
+| `sync.sh` | Script para atualizar o backup + Bitwarden |
 
 ---
 
-## Sincronizar (atualizar o backup)
+## Sincronizar (atualizar backup + Bitwarden)
 
-Rodar sempre que mudar configuração, instalar plugin, acumular memórias, etc.:
+Rodar sempre que mudar configuração, instalar plugin, acumular memórias, ou alterar um secret:
 
 ```bash
+export BW_SESSION=$(bw unlock --raw)
 cd ~/GitHub/claude-dotfiles && ./sync.sh && git add -A && git commit -m "sync: $(date +%Y-%m-%d)" && git push
 ```
 
@@ -37,8 +39,8 @@ cd ~/GitHub/claude-dotfiles && ./sync.sh && git add -A && git commit -m "sync: $
 # Claude Code CLI
 # Instalar em: https://claude.ai/download
 
-# Node.js
-brew install node
+# Node.js + Bitwarden CLI
+brew install node bitwarden-cli
 
 # gcloud CLI
 brew install --cask google-cloud-sdk
@@ -47,30 +49,31 @@ gcloud config set project solid-choir-461101-t3
 gcloud auth application-default login --account alisson@webjump.ai
 ```
 
-### 2. Clonar e instalar
+### 2. Clonar e autenticar no Bitwarden
 
 ```bash
 git clone git@github.com:alissonaguiar/claude-dotfiles.git ~/GitHub/claude-dotfiles
 cd ~/GitHub/claude-dotfiles
 
-# Preencher as API keys
-cp .env.example .env
-nano .env   # ou code .env
+bw login
+export BW_SESSION=$(bw unlock --raw)
+```
 
-# Instalar
-chmod +x install.sh
+### 3. Instalar (secrets buscados automaticamente do Bitwarden)
+
+```bash
 ./install.sh
 ```
 
-### 3. Instalar plugins
+### 4. Instalar plugins
 
 ```bash
-# Adicionar marketplaces customizados primeiro
+# Marketplaces customizados (adicionar primeiro)
 claude plugin marketplace add everything-claude-code https://github.com/affaan-m/everything-claude-code
 claude plugin marketplace add bmad-method https://github.com/bmad-code-org/bmad-method
 claude plugin marketplace add bitwize-music https://github.com/bitwize-music-studio/claude-ai-music-skills
 
-# Instalar os plugins
+# Plugins
 claude plugin install superpowers@claude-plugins-official
 claude plugin install frontend-design@claude-plugins-official
 claude plugin install everything-claude-code@everything-claude-code
@@ -78,18 +81,29 @@ claude plugin install bmad-method-lifecycle@bmad-method
 claude plugin install bitwize-music@bitwize-music
 ```
 
-### 4. Extensão do Chrome
+### 5. Extensão do Chrome
 
-Instalar a extensão **Playwright MCP Bridge** no Chrome:
-- ID: `mmlmfjhmonkocbjadbfplnigmagldckm`
-- Chrome Web Store: buscar por "Playwright MCP Bridge"
+Instalar **Playwright MCP Bridge** no Chrome: ID `mmlmfjhmonkocbjadbfplnigmagldckm`
 
 ---
 
-## Variáveis de ambiente necessárias
+## Adicionar novo secret
 
-Ver `.env.example`. Atualmente:
+1. Adicionar entrada em `secrets.json`
+2. Adicionar `KEY=valor` no `.env` local
+3. Rodar sync — cria item no Bitwarden e commita o mapa
 
-| Variável | Onde obter |
-|---|---|
-| `STITCH_X_GOOG_API_KEY` | https://stitch.withgoogle.com → Settings → API Keys |
+```bash
+export BW_SESSION=$(bw unlock --raw)
+cd ~/GitHub/claude-dotfiles && ./sync.sh && git add -A && git commit -m "feat: add <nome> secret" && git push
+```
+
+---
+
+## Dependências externas
+
+- **Claude Code CLI**: https://claude.ai/download
+- **Node.js 18+**: `brew install node`
+- **Bitwarden CLI**: `brew install bitwarden-cli`
+- **gcloud CLI**: https://cloud.google.com/sdk/docs/install
+- **Playwright MCP Bridge** (Chrome): ID `mmlmfjhmonkocbjadbfplnigmagldckm`
