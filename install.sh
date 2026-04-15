@@ -11,16 +11,61 @@ echo "    Source: $DOTFILES_DIR"
 echo "    Target: $CLAUDE_DIR"
 echo ""
 
-# Load .env if present
-if [ -f "$DOTFILES_DIR/.env" ]; then
-  export $(grep -v '^#' "$DOTFILES_DIR/.env" | xargs)
-  echo "[ok] .env loaded"
+# --- Secrets via Bitwarden ---
+source "$DOTFILES_DIR/scripts/bw-helpers.sh"
+
+echo "--> Carregando secrets do Bitwarden..."
+if bw_check_auth; then
+  # Gerar .env a partir do secrets.json
+  DOTFILES_DIR="$DOTFILES_DIR" python3 - <<'PYEOF'
+import json, subprocess, os, sys
+
+secrets_path = os.path.join(os.environ.get('DOTFILES_DIR', '.'), 'secrets.json')
+env_path = os.path.join(os.environ.get('DOTFILES_DIR', '.'), '.env')
+
+with open(secrets_path) as f:
+    secrets = json.load(f)
+
+lines = []
+missing = []
+for env_var, meta in secrets.items():
+    item_name = meta['item']
+    result = subprocess.run(
+        ['bw', 'get', 'password', item_name],
+        capture_output=True, text=True
+    )
+    value = result.stdout.strip()
+    if value:
+        lines.append(f'{env_var}={value}')
+        print(f'    [ok] {env_var} ({item_name})')
+    else:
+        missing.append(item_name)
+        print(f'    [warn] não encontrado no Bitwarden: {item_name}', file=sys.stderr)
+
+with open(env_path, 'w') as f:
+    f.write('\n'.join(lines) + '\n')
+
+if missing:
+    print(f'\n    [warn] {len(missing)} secret(s) ausente(s) — configure no Bitwarden e re-rode install.sh')
+PYEOF
+  set +e
+  export $(grep -v '^#' "$DOTFILES_DIR/.env" | xargs) 2>/dev/null
+  set -e
+  echo "    [ok] .env gerado"
 else
-  echo "[warn] .env not found — copy .env.example to .env and fill in your API keys"
+  echo "    [warn] Bitwarden não disponível — tentando .env local..."
+  if [ -f "$DOTFILES_DIR/.env" ]; then
+    set +e
+    export $(grep -v '^#' "$DOTFILES_DIR/.env" | xargs)
+    set -e
+    echo "    [ok] .env local carregado"
+  else
+    echo "    [warn] Sem .env e sem Bitwarden — MCP servers sem autenticação"
+  fi
 fi
+echo ""
 
 # 1. settings.json
-echo ""
 echo "--> Copying settings.json..."
 cp "$DOTFILES_DIR/settings.json" "$CLAUDE_DIR/settings.json"
 echo "    [ok] settings.json"
@@ -61,12 +106,11 @@ if [ -f "$HOME/.claude.json" ]; then
   echo "    [ok] backup saved to ~/.claude.json.bak"
 fi
 
-# Merge mcpServers into existing ~/.claude.json (or create new)
-python3 - <<'PYEOF'
+DOTFILES_DIR="$DOTFILES_DIR" python3 - <<'PYEOF'
 import json, os, re
 
-dotfiles = os.path.dirname(os.path.abspath(__file__)) if '__file__' in dir() else os.getcwd()
-example_path = os.path.join(os.path.expanduser('~'), 'GitHub', 'claude-dotfiles', 'claude.json.example')
+dotfiles = os.environ.get('DOTFILES_DIR', '.')
+example_path = os.path.join(dotfiles, 'claude.json.example')
 target_path = os.path.expanduser('~/.claude.json')
 
 with open(example_path) as f:
