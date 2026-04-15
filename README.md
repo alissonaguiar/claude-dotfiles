@@ -7,15 +7,15 @@ Backup portável da configuração do Claude Code, com secrets gerenciados via B
 | Arquivo/Dir | Descrição |
 |---|---|
 | `settings.json` | Plugins habilitados, hooks, modelo padrão |
-| `settings.local.json` | Permissões de Bash/WebFetch |
-| `history.jsonl` | Histórico de comandos do Claude |
 | `secrets.json` | Mapa de env vars → itens do Bitwarden (sem valores) |
 | `claude.json.example` | MCP servers com placeholders de vars |
 | `skills/` | Skills customizadas (ui-ux-pro-max, air-brand-guidelines) |
-| `projects/` | Memórias por projeto |
+| `projects/` | Memórias por projeto (apenas `.md`, sem dados sensíveis) |
 | `scripts/bw-helpers.sh` | Funções auxiliares do Bitwarden CLI |
 | `install.sh` | Script de restauração numa máquina nova |
 | `sync.sh` | Script para atualizar o backup + Bitwarden |
+
+> **Arquivos pessoais** (`history.jsonl`, `settings.local.json`, memórias completas) ficam apenas no repositório privado `claude-dotfiles-private`.
 
 ---
 
@@ -25,7 +25,15 @@ Rodar sempre que mudar configuração, instalar plugin, acumular memórias, ou a
 
 ```bash
 export BW_SESSION=$(bw unlock --raw)
-cd ~/GitHub/claude-dotfiles && ./sync.sh && git add -A && git commit -m "sync: $(date +%Y-%m-%d)" && git push
+
+# Roda o sync (atualiza ambos os repos localmente + Bitwarden)
+cd ~/GitHub/claude-dotfiles && ./sync.sh
+
+# Commit e push do repo público (sem dados pessoais)
+git add -A && git commit -m "sync: $(date +%Y-%m-%d)" && git push
+
+# Commit e push do repo privado (backup completo)
+cd ~/GitHub/claude-dotfiles-private && git add -A && git commit -m "sync: $(date +%Y-%m-%d)" && git push
 ```
 
 ---
