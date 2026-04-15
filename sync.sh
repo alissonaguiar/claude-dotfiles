@@ -99,7 +99,7 @@ echo "--> Sincronizando arquivos de config..."
 
 cp "$CLAUDE_DIR/settings.json"       "$DOTFILES_DIR/settings.json"
 cp "$CLAUDE_DIR/settings.local.json" "$DOTFILES_DIR/settings.local.json"
-cp "$CLAUDE_DIR/history.jsonl"       "$DOTFILES_DIR/history.jsonl"
+[ -f "$CLAUDE_DIR/history.jsonl" ] && cp "$CLAUDE_DIR/history.jsonl" "$DOTFILES_DIR/history.jsonl"
 echo "  [ok] settings + history"
 
 # Skills

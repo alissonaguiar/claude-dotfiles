@@ -48,15 +48,19 @@ with open(env_path, 'w') as f:
 if missing:
     print(f'\n    [warn] {len(missing)} secret(s) ausente(s) — configure no Bitwarden e re-rode install.sh')
 PYEOF
-  # Exporta vars do .env gerado (guarda contra arquivo vazio)
-  env_content=$(grep -v '^#' "$DOTFILES_DIR/.env" | grep '=')
-  [ -n "$env_content" ] && set +e && export $env_content && set -e
+  # Exporta vars do .env gerado (allexport garante valores com espaços/chars especiais)
+  set -o allexport
+  # shellcheck source=/dev/null
+  source "$DOTFILES_DIR/.env" 2>/dev/null || true
+  set +o allexport
   echo "    [ok] .env gerado"
 else
   echo "    [warn] Bitwarden não disponível — tentando .env local..."
   if [ -f "$DOTFILES_DIR/.env" ]; then
-    env_content=$(grep -v '^#' "$DOTFILES_DIR/.env" | grep '=')
-    [ -n "$env_content" ] && set +e && export $env_content && set -e
+    set -o allexport
+    # shellcheck source=/dev/null
+    source "$DOTFILES_DIR/.env"
+    set +o allexport
     echo "    [ok] .env local carregado"
   else
     echo "    [warn] Sem .env e sem Bitwarden — MCP servers sem autenticação"

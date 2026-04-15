@@ -33,10 +33,11 @@ bw_ensure_folder() {
   local folder_id
 
   folder_id=$(bw list folders 2>/dev/null \
-    | python3 -c "
-import sys, json
+    | BW_FOLDER_NAME="$folder_name" python3 -c "
+import sys, json, os
 folders = json.load(sys.stdin)
-match = next((f for f in folders if f['name'] == '$folder_name'), None)
+name = os.environ['BW_FOLDER_NAME']
+match = next((f for f in folders if f['name'] == name), None)
 print(match['id'] if match else '')
 " 2>/dev/null)
 
