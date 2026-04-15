@@ -1,7 +1,6 @@
 # claude-dotfiles
 
 Backup portável da configuração do Claude Code, com secrets gerenciados via Bitwarden.
-Repo: https://github.com/alissonaguiar/claude-dotfiles
 
 ## O que está aqui
 
@@ -44,15 +43,15 @@ brew install node bitwarden-cli
 
 # gcloud CLI
 brew install --cask google-cloud-sdk
-gcloud auth login --account alisson@webjump.ai
-gcloud config set project solid-choir-461101-t3
-gcloud auth application-default login --account alisson@webjump.ai
+gcloud auth login
+gcloud config set project YOUR_GCP_PROJECT_ID
+gcloud auth application-default login
 ```
 
 ### 2. Clonar e autenticar no Bitwarden
 
 ```bash
-git clone git@github.com:alissonaguiar/claude-dotfiles.git ~/GitHub/claude-dotfiles
+git clone git@github.com:YOUR_USER/claude-dotfiles.git ~/GitHub/claude-dotfiles
 cd ~/GitHub/claude-dotfiles
 
 bw login
@@ -95,7 +94,7 @@ Instalar **Playwright MCP Bridge** no Chrome: ID `mmlmfjhmonkocbjadbfplnigmagldc
 
 ```bash
 export BW_SESSION=$(bw unlock --raw)
-cd ~/GitHub/claude-dotfiles && ./sync.sh && git add -A && git commit -m "feat: add <nome> secret" && git push
+cd ~/GitHub/claude-dotfiles && ./sync.sh && git add -A && git commit -m "feat: add <secret-name>" && git push
 ```
 
 ---
